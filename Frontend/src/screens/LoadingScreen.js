@@ -10,6 +10,7 @@ import {
     StyleSheet,
     Animated,
     Platform,
+    Alert,
 } from "react-native";
 
 import { uploadScan } from "../services/api";
@@ -226,38 +227,74 @@ export default function LoadingScreen({
 
                 }
 
-                const result =
-                    await uploadScan(
-                        formData
+                const result = await uploadScan(formData);
+
+                // Invalid image uploaded
+                if (!result.success) {
+
+                    Alert.alert(
+
+                        "Invalid Image",
+
+                        result.message,
+
+                        [
+                            {
+                                text: "OK",
+
+                                onPress: () => navigation.goBack()
+                            }
+                        ]
+
                     );
 
+                    return;
+                }
+
+                // Valid image
                 setTimeout(() => {
 
                     navigation.replace(
+
                         "Result",
+
                         {
+
                             user,
 
                             mode,
+
                             patientName,
+
                             patientAge,
 
                             xrayImage,
+
                             cbctImage,
 
-                            aiResult:
-                                result.aiResult
+                            aiResult: result.aiResult
+
                         }
+
                     );
 
                 }, 7200);
 
             } catch (error) {
 
-                console.log(
-                    "ANALYSIS ERROR:",
-                    error
+                console.log("ANALYSIS ERROR:", error);
+
+                Alert.alert(
+                    "Invalid Image",
+                    "Please upload a valid Dental X-ray or CBCT image.",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => navigation.goBack(),
+                        },
+                    ]
                 );
+
             }
 
         };

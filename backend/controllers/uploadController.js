@@ -81,6 +81,20 @@ const uploadScan = async (req, res) => {
 
         console.log("AI RESPONSE =", aiResponse);
 
+        // Python rejected the image
+        if (!aiResponse.success) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: aiResponse.message
+
+            });
+
+        }
+
+        // Valid dental image
         res.status(200).json({
 
             success: true,
@@ -94,19 +108,24 @@ const uploadScan = async (req, res) => {
 
                 cbctImage:
                     cbctImage?.filename || null,
+
             }
 
         });
 
     } catch (error) {
 
-        console.log(error);
+        console.log("UPLOAD ERROR =", error);
+
+        if (error.response) {
+            console.log("PYTHON RESPONSE =", error.response.data);
+        }
 
         res.status(500).json({
 
             success: false,
 
-            message: "Server Error",
+            message: error.response?.data?.message || error.message,
 
         });
 

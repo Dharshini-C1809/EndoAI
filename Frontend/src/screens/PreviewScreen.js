@@ -404,6 +404,10 @@ export default function PreviewScreen({
 
         console.log("ROI SENT =", roi);
 
+        console.log("X-ray Original Size =", xrayOriginalSize);
+        console.log("CBCT Original Size =", cbctOriginalSize);
+        console.log("Mode =", mode);
+
         navigation.navigate(
             "Loading",
             {

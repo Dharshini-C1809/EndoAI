@@ -27,6 +27,29 @@ PROCESSED_FOLDER = "processed"
 
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
+def isDentalImage(image):
+
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    mean = np.mean(gray)
+
+    std = np.std(gray)
+
+    edges = cv2.Canny(gray, 50, 150)
+
+    edgeDensity = np.sum(edges > 0) / (gray.shape[0] * gray.shape[1])
+
+    if mean < 15 or mean > 245:
+        return False
+
+    if std < 10:
+        return False
+
+    if edgeDensity < 0.01:
+        return False
+
+    return True
+
 
 @app.route("/")
 def home():
@@ -82,6 +105,15 @@ def analyze():
                 "message": "Image not found"
             })
 
+        if not isDentalImage(image):
+
+            return jsonify({
+
+                "success": False,
+
+                "message": "Please upload a valid Dental X-ray or CBCT image."
+            })
+
         # ROI VALUES
 
         x = int(roi["x"])
@@ -89,21 +121,14 @@ def analyze():
         width = int(roi["width"])
         height = int(roi["height"])
 
-        if width <= 0 or height <= 0:
-            return jsonify({
-                "success": False,
-                "message": "Invalid ROI"
-            })
-        
         if width <= 1 or height <= 1:
+
             imgHeight, imgWidth = image.shape[:2]
 
             x = 0
             y = 0
             width = imgWidth
             height = imgHeight
-
-        imgHeight, imgWidth = image.shape[:2]
 
         x = max(0, min(x, imgWidth - 1))
         y = max(0, min(y, imgHeight - 1))
